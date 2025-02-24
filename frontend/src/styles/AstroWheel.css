@@ -1,0 +1,20 @@
+.astro-wheel-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 400px;
+  }
+  
+  .astro-wheel {
+    width: 400px;
+    height: 400px;
+  }
+  
+  .astro-wheel circle {
+    transition: fill 1s ease-in-out;
+  }
+  
+  .orb-highlight {
+    fill: yellow; /* Smoothly highlight active planets */
+  }
+  
