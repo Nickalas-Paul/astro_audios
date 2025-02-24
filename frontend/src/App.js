@@ -1,6 +1,6 @@
 import React, { useState } from "react";
+import AstroWheel from "./components/AstroWheel";
 import "../styles/AstroWheel.css";
-
 
 function App() {
   // State for user input
@@ -99,23 +99,18 @@ function App() {
     <div>
       <h1>Astrology Data Generator</h1>
       <form onSubmit={handleSubmit}>
-        <label>
-          Date of Birth:
-          <input type="date" name="date" value={birthData.date} onChange={handleChange} required />
-        </label>
-        <br />
-        <label>
-          Time of Birth:
-          <input type="time" name="time" value={birthData.time} onChange={handleChange} required />
-        </label>
-        <br />
-        <label>
-          Location:
-          <input type="text" name="location" value={birthData.location} onChange={handleChange} required />
-        </label>
-        <br />
-        <button type="submit">Get Astrology Data</button>
-      </form>
+  <label htmlFor="date">Date of Birth:</label>
+  <input type="date" name="date" id="date" value={birthData.date} onChange={handleChange} required />
+
+  <label htmlFor="time">Time of Birth:</label>
+  <input type="time" name="time" id="time" value={birthData.time} onChange={handleChange} required />
+
+  <label htmlFor="location">Location:</label>
+  <input type="text" name="location" id="location" value={birthData.location} onChange={handleChange} required />
+
+  <button type="submit">Get Astrology Data</button>
+</form>
+
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
