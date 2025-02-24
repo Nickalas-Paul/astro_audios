@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-        "prestart": "kill -9 $(lsof -ti :5000) 2>/dev/null || true",
+    "prestart": "kill -9 $(lsof -ti :5000) 2>/dev/null || true",
     "start": "node server.js"
   },
   "keywords": [],
@@ -15,6 +15,9 @@
     "axios": "^1.7.9",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "node-fetch": "^3.3.2",
+    "nodemon": "^3.1.9",
+    "server.js": "^1.0.0"
   }
 }

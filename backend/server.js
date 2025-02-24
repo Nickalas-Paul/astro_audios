@@ -1,18 +1,19 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { getAccessToken } = require('./prokeralaAuth'); // Import the token handler
+const { getAccessToken } = require('./prokeralaAuth'); // Import Prokerala token handler
 const axios = require('axios');
 
 const app = express();
 
 // ✅ Improved CORS Configuration
 const corsOptions = {
-    origin: '*', // Allow all origins for development
-    methods: 'GET,POST',
-    allowedHeaders: 'Content-Type'
+    origin: ["http://localhost:3000", "https://fuzzy-adventure-j7547v5qpjpcqj9r-3001.app.github.dev"], // Adjust for your environment
+    methods: "GET,POST",
+    allowedHeaders: "Content-Type"
 };
 app.use(cors(corsOptions));
+
 app.use(express.json());
 
 console.log("🔍 GOOGLE_GEOCODING_API_KEY:", process.env.GOOGLE_GEOCODING_API_KEY);
@@ -20,6 +21,33 @@ console.log("🔍 GOOGLE_GEOCODING_API_KEY:", process.env.GOOGLE_GEOCODING_API_K
 // ✅ TEST ROUTE: Check if the backend is responding correctly
 app.get('/test', (req, res) => {
     res.json({ message: 'Backend is working! ✅' });
+});
+
+// ✅ PROXY SERVER ROUTE for Secure API Calls
+app.post('/api/proxy', async (req, res) => {
+    try {
+        const { apiUrl, params } = req.body;
+
+        if (!apiUrl) {
+            return res.status(400).json({ error: 'Missing API URL' });
+        }
+
+        // Define headers
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        // Handle API requests securely
+        const response = await axios.get(apiUrl, {
+            params,
+            headers,
+        });
+
+        res.json(response.data);
+    } catch (error) {
+        console.error('❌ Proxy Server Error:', error.message);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // ✅ NEW API Route for Geocoding
@@ -30,7 +58,7 @@ app.post('/api/geocode', async (req, res) => {
             return res.status(400).json({ error: 'Missing location parameter' });
         }
 
-        const GOOGLE_API_KEY = process.env.GOOGLE_GEOCODING_API_KEY; // ✅ FIXED KEY NAME
+        const GOOGLE_API_KEY = process.env.GOOGLE_GEOCODING_API_KEY;
         if (!GOOGLE_API_KEY) {
             return res.status(500).json({ error: 'Google API key is missing in the .env file' });
         }
@@ -57,10 +85,9 @@ app.post('/api/astrology', async (req, res) => {
     try {
         const { datetime, latitude, longitude, ayanamsa } = req.body;
 
-// Ensure datetime is correctly formatted with timezone
-const formattedDatetime = new Date(datetime).toISOString();
-
-console.log('📅 Formatted Datetime:', formattedDatetime);
+        // Ensure datetime is correctly formatted with timezone
+        const formattedDatetime = new Date(datetime).toISOString();
+        console.log('📅 Formatted Datetime:', formattedDatetime);
 
         if (!datetime || !latitude || !longitude || !ayanamsa) {
             return res.status(400).json({ error: 'Missing required parameters: datetime, latitude, longitude, ayanamsa' });
@@ -75,7 +102,7 @@ console.log('📅 Formatted Datetime:', formattedDatetime);
         // Make the astrology API request
         const response = await axios.get('https://api.prokerala.com/v2/astrology/kundli', {
             params: {
-                datetime: formattedDatetime,  // ✅ Corrected format
+                datetime: formattedDatetime,  
                 ayanamsa,
                 coordinates: `${latitude},${longitude}`
             },
