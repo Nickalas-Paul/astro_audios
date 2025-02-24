@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../styles/AstroWheel.css";
 
-const AstroWheel = ({ userChartData }) => {
-  const [wheelData, setWheelData] = useState(null);
 
   useEffect(() => {
     if (userChartData) {
