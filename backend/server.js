@@ -23,33 +23,6 @@ app.get('/test', (req, res) => {
     res.json({ message: 'Backend is working! ✅' });
 });
 
-// ✅ PROXY SERVER ROUTE for Secure API Calls
-app.post('/api/proxy', async (req, res) => {
-    try {
-        const { apiUrl, params } = req.body;
-
-        if (!apiUrl) {
-            return res.status(400).json({ error: 'Missing API URL' });
-        }
-
-        // Define headers
-        const headers = {
-            'Content-Type': 'application/json',
-        };
-
-        // Handle API requests securely
-        const response = await axios.get(apiUrl, {
-            params,
-            headers,
-        });
-
-        res.json(response.data);
-    } catch (error) {
-        console.error('❌ Proxy Server Error:', error.message);
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // ✅ NEW API Route for Geocoding
 app.post('/api/geocode', async (req, res) => {
     try {
