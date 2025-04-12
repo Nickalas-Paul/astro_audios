@@ -1,0 +1,63 @@
+{
+    "sun": {
+      "sign": "Taurus",
+      "position": "25°05'"
+    },
+    "moon": {
+      "sign": "Taurus",
+      "position": "22°37'"
+    },
+    "ascendant": {
+      "sign": "Leo",
+      "position": "14°46'"
+    },
+    "planets": {
+      "Mercury": {
+        "sign": "Gemini",
+        "position": "16°47'"
+      },
+      "Venus": {
+        "sign": "Gemini",
+        "position": "29°34'"
+      },
+      "Mars": {
+        "sign": "Aquarius",
+        "position": "25°46'"
+      },
+      "Jupiter": {
+        "sign": "Taurus",
+        "position": "15°43'"
+      },
+      "Saturn": {
+        "sign": "Capricorn",
+        "position": "1°37' R"
+      },
+      "Uranus": {
+        "sign": "Capricorn",
+        "position": "0°22' R"
+      },
+      "Neptune": {
+        "sign": "Capricorn",
+        "position": "9°54' R"
+      },
+      "Pluto": {
+        "sign": "Scorpio",
+        "position": "10°48' R"
+      }
+    },
+    "houses": {
+      "I": "Leo",
+      "II": "Virgo",
+      "III": "Libra",
+      "IV": "Scorpio",
+      "V": "Sagittarius",
+      "VI": "Capricorn",
+      "VII": "Aquarius",
+      "VIII": "Pisces",
+      "IX": "Aries",
+      "X": "Taurus",
+      "XI": "Gemini",
+      "XII": "Cancer"
+    }
+  }
+  

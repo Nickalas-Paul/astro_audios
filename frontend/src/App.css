@@ -1,38 +1,75 @@
-.App {
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.error-message {
+  color: red;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid red;
+  border-radius: 5px;
+  background-color: #ffe6e6;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.birth-data-display, .astro-data-display {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-.App-link {
-  color: #61dafb;
+button:hover {
+  background-color: #333;
+}
+.preview-wheel-wrapper {
+  margin-top: 2rem;
+  opacity: 0.4;
+  transition: opacity 0.4s ease;
+}
+@keyframes pulseGlow {
+  0% { filter: drop-shadow(0 0 2px #ffd700); }
+  50% { filter: drop-shadow(0 0 8px #ffd700); }
+  100% { filter: drop-shadow(0 0 2px #ffd700); }
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.sector.glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+.sector {
+  transition: fill 0.4s ease, filter 0.4s ease;
+}
+
+.sector.glow {
+  filter: drop-shadow(0 0 6px #ffd700);
+}
+.sector {
+  transition: fill 0.3s ease, filter 0.3s ease;
+}
+
+.sector.glow {
+  /* base glow handled in style prop with drop-shadow */
+}
+
+.sector.active {
+  animation: pulseActive 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseActive {
+  0% { filter: drop-shadow(0 0 3px #fff); }
+  50% { filter: drop-shadow(0 0 10px #fff); }
+  100% { filter: drop-shadow(0 0 3px #fff); }
 }

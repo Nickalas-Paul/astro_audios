@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "dev": "concurrently \"cd ../backend/app && python run.py\" \"vite\"",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prestart": "kill -9 $(lsof -ti :5000) 2>/dev/null || true",
     "start": "node server.js"
@@ -19,5 +22,8 @@
     "node-fetch": "^3.3.2",
     "nodemon": "^3.1.9",
     "server.js": "^1.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   }
 }
