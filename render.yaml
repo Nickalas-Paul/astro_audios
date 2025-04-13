@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: astro-audios-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app/run.py
+    rootDir: backend
+    autoDeploy: true
