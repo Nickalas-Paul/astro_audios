@@ -4,7 +4,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 # Load environment variables from a .env file
-load_dotenv()
+
 
 # Load API credentials and URLs from environment variables
 ASTRO_CLIENT_ID = os.environ.get('ASTRO_CLIENT_ID', '85400dde-a3d3-4bdc-9e30-ecf1ad721f0c')
