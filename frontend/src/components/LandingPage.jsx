@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { geocodeLocation } from '../utils/geocodeLocation';
 
 const LandingPage = ({ onSubmitBirthData }) => {
   const [birthData, setBirthData] = useState({
@@ -6,6 +7,9 @@ const LandingPage = ({ onSubmitBirthData }) => {
     time: '',
     location: '',
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -15,12 +19,25 @@ const LandingPage = ({ onSubmitBirthData }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (onSubmitBirthData) {
-      onSubmitBirthData(birthData);
+    setIsSubmitting(true);
+    setError(null);
+
+    const geo = await geocodeLocation(birthData.location);
+    if (!geo) {
+      setError("Unable to locate that place. Please double-check your spelling.");
+      setIsSubmitting(false);
+      return;
     }
-    console.log('Submitted Birth Data:', birthData);
+
+    const fullData = {
+      ...birthData,
+      geolocation: geo
+    };
+
+    onSubmitBirthData(fullData);
+    console.log("✅ Submitted Birth Data:", fullData);
   };
 
   return (
@@ -35,6 +52,7 @@ const LandingPage = ({ onSubmitBirthData }) => {
             name="date"
             value={birthData.date}
             onChange={handleChange}
+            required
           />
         </div>
         <div>
@@ -45,6 +63,7 @@ const LandingPage = ({ onSubmitBirthData }) => {
             name="time"
             value={birthData.time}
             onChange={handleChange}
+            required
           />
         </div>
         <div>
@@ -56,9 +75,13 @@ const LandingPage = ({ onSubmitBirthData }) => {
             placeholder="City, Country"
             value={birthData.location}
             onChange={handleChange}
+            required
           />
         </div>
-        <button type="submit">Generate Chart & Music</button>
+        {error && <p className="error-message">{error}</p>}
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Looking up coordinates..." : "Generate Chart & Music"}
+        </button>
       </form>
     </div>
   );
