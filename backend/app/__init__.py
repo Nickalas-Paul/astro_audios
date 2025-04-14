@@ -1,5 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
+from app.routes.music_routes import music_routes
+app.register_blueprint(music_routes)
 
 app = Flask(__name__)
 
