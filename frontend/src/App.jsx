@@ -8,12 +8,62 @@ import HouseProgression from './components/HouseProgression';
 import { fetchAstroData } from './services/astroService';
 import { convertWesternChartToMusicInput } from './music/chartToMusicInput';
 import { mapChartToMusic } from './music/musicMapping';
+import { fetchMusicProfile } from './services/astroService';
 
 const zodiacColorMapping = {
   Aries: "#FF6347", Taurus: "#90EE90", Gemini: "#FFD700", Cancer: "#ADD8E6",
   Leo: "#FFA500", Virgo: "#DAA520", Libra: "#FFC0CB", Scorpio: "#8A2BE2",
   Sagittarius: "#4682B4", Capricorn: "#A0522D", Aquarius: "#00CED1", Pisces: "#9370DB"
 };
+const [musicProfile, setMusicProfile] = useState(null);
+
+// After astroData is set:
+useEffect(() => {
+  const loadMusicProfile = async () => {
+    if (!astroData) return;
+
+    const chart = [];
+
+    // Build the chart from astroData — for now, use mock data:
+    chart.push({ planet: "Sun", sign: "Taurus", house: 10 });
+    chart.push({ planet: "Moon", sign: "Taurus", house: 10 });
+    chart.push({ planet: "Jupiter", sign: "Taurus", house: 10 });
+    chart.push({ planet: "Saturn", sign: "Capricorn", house: 5 });
+    chart.push({ planet: "Uranus", sign: "Capricorn", house: 5 });
+    chart.push({ planet: "Neptune", sign: "Capricorn", house: 5 });
+    chart.push({ planet: "Mercury", sign: "Gemini", house: 11 });
+    chart.push({ planet: "Venus", sign: "Gemini", house: 11 });
+    chart.push({ planet: "Mars", sign: "Aquarius", house: 7 });
+    chart.push({ planet: "None", sign: "Leo", house: 1 });
+    chart.push({ planet: "None", sign: "Libra", house: 3 });
+    chart.push({ planet: "None", sign: "Scorpio", house: 4 });
+
+    const profile = await fetchMusicProfile(chart);
+    setMusicProfile(profile);
+  };
+
+  loadMusicProfile();
+}, [astroData]);
+{musicProfile && (
+  <div className="music-profile-display">
+    <h3>Your Astro Audio Profile</h3>
+    <ul>
+      {musicProfile.map((entry, idx) => (
+        <li key={idx}>
+          <strong>House {entry.house}</strong> in <em>{entry.sign}</em>
+          {entry.planet && <> — {entry.planet}</>}
+          <ul>
+            <li>Theme: {entry.theme}</li>
+            <li>Mood: {entry.mood}</li>
+            <li>Instrument: {entry.instrument}</li>
+            <li>Scale: {entry.scale}</li>
+            <li>Rhythm: {entry.rhythm}</li>
+          </ul>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
 
 function App() {
   const [activeHouse, setActiveHouse] = useState(null);

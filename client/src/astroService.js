@@ -56,6 +56,28 @@ const getCoordinates = async (location) => {
     return { latitude: 0, longitude: 0 }; // Default to (0,0) if lookup fails
   }
 };
+export const fetchMusicProfile = async (chartData) => {
+  try {
+    const response = await fetch('http://localhost:5000/api/music-profile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ chart: chartData })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Network response was not ok');
+    }
+
+    return data.profile;
+  } catch (error) {
+    console.error('Error fetching music profile:', error.message);
+    return null;
+  }
+};
 
 // Function to Fetch Birth Chart Data from Prokerala API
 export const getBirthChart = async (birthData) => {
