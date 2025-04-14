@@ -8,6 +8,14 @@ export default defineConfig({
     open: true,
     hmr: {
       overlay: false
+    },
+    build: {
+      rollupOptions: {
+        input: '/index.html',
+      },
+    },
+    server: {
+      historyApiFallback: true
     }
   },
   resolve: {
