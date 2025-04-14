@@ -55,6 +55,38 @@ def convert_vedic_to_western(vedic_data):
         vedic_sign = soorya_rasi["name"]
         western_data["soorya_rasi"] = zodiac_mapping.get(vedic_sign, vedic_sign)
     return western_data
+def get_musical_profile(planet: str, sign: str, house: int):
+    from app.utils.zodiac_data import zodiac_music_mapping
+    from app.utils.zodiac_data import planet_music_effects
+    from app.utils.zodiac_data import HOUSE_MUSIC_RULES
+
+    planet_data = planet_music_effects.get(planet, {})
+    sign_data = zodiac_music_mapping.get(sign, {})
+    house_data = HOUSE_MUSIC_RULES.get(house, {})
+
+    if not planet_data or not sign_data or not house_data:
+        return {"error": "Invalid planet, sign, or house provided."}
+
+    musical_profile = {
+        "planet": planet,
+        "sign": sign,
+        "house": house,
+        "motif": planet_data["motif"],
+        "intensity": planet_data["intensity"],
+        "brightness": planet_data["brightness"],
+        "instrument": sign_data["instrument"],
+        "scale": sign_data["scale"],
+        "tempo": sign_data["tempo"],
+        "attack": sign_data["attack"],
+        "rhythm": sign_data["rhythm"],
+        "mood": house_data["mood"],
+        "harmony": house_data["harmony"],
+        "spatial": house_data["spatial"],
+        "dynamics": house_data["dynamics"],
+        "theme": house_data["theme"]
+    }
+
+    return musical_profile
 
 def validate_birth_data(data):
     """Validate the structure and content of the birth data."""
