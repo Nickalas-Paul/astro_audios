@@ -162,6 +162,7 @@ function App() {
               <button onClick={handleReset}>Generate New Chart</button>
             </div>
           )}
+<MusicPlayer activeHouse={activeHouse} musicProfile={musicProfile} />
 
           <div className="main-content-area">
             <div className="interactive-area">
