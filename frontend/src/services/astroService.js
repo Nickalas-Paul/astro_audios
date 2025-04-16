@@ -1,23 +1,22 @@
-// frontend/src/services/astroService.js
-
-export const fetchAstroData = async (birthData) => {
+export const fetchMusicProfile = async (chartData) => {
   try {
-    const response = await fetch("https://astro-audios.onrender.com/api/astro", {
-      method: "POST",
+    const response = await fetch('http://localhost:5000/api/music-profile', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json"
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ birthData })
+      body: JSON.stringify({ chart: chartData })
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Failed to fetch chart data");
+      throw new Error(data.message || 'Network response was not ok');
     }
 
-    return await response.json();
+    return data.profile;
   } catch (error) {
-    console.error("Error fetching astro data:", error.message);
-    return { status: "error", message: error.message };
+    console.error('Error fetching music profile:', error.message);
+    return null;
   }
 };
