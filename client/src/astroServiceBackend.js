@@ -1,4 +1,5 @@
 import axios from "axios";
+const { getAccessToken } = require('./astroServiceBackend.js');
 
 // Prokerala OAuth Credentials
 const CLIENT_ID = "85400dde-a3d3-4bdc-9e30-ecf1ad721f0c"; // Replace with your Prokerala Client ID
@@ -9,30 +10,6 @@ const API_BASE_URL = "https://api.prokerala.com/"; // Base URL for API requests
 // Google Maps Geolocation API
 const GEOCODE_API_KEY = "AIzaSyBQy3P-tZ2T_c2bKBrZ0CgRd2jnV5D113U"; // Replace with your Google Maps API Key
 const GEOCODE_URL = "https://maps.googleapis.com/maps/api/geocode/json";
-
-// Function to Obtain OAuth Access Token from Prokerala
-const getAccessToken = async () => {
-  try {
-    const response = await axios.post(
-      TOKEN_URL,
-      new URLSearchParams({
-        grant_type: "client_credentials",
-        client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET,
-      }),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-    console.log("Access Token:", response.data.access_token); // Debugging log
-    return response.data.access_token;
-  } catch (error) {
-    console.error("Error getting access token:", error.response?.data || error.message);
-    return null;
-  }
-};
 
 // Function to Get Latitude & Longitude from City/Country using Google Maps API
 const getCoordinates = async (location) => {
