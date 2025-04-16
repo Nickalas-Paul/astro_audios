@@ -190,5 +190,6 @@ function App() {
     </div>
   );
 }
+<MusicPlayer musicProfile={musicProfile} />
 
 export default App;

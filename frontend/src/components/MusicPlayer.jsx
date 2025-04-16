@@ -1,37 +1,37 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as Tone from 'tone';
 
-const MusicPlayer = ({ activeHouse, musicProfile }) => {
-  const synthRef = useRef(null);
+const scaleMap = {
+  ionian: ["C4", "D4", "E4", "F4", "G4", "A4", "B4"],
+  lydian: ["C4", "D4", "E4", "F#4", "G4", "A4", "B4"],
+  dorian: ["C4", "D4", "Eb4", "F4", "G4", "A4", "Bb4"],
+  mixolydian: ["C4", "D4", "E4", "F4", "G4", "A4", "Bb4"]
+};
 
-  // Map scale names to note sets
-  const scaleMap = {
-    ionian: ["C4", "D4", "E4", "F4", "G4", "A4", "B4"],
-    lydian: ["C4", "D4", "E4", "F#4", "G4", "A4", "B4"],
-    dorian: ["C4", "D4", "Eb4", "F4", "G4", "A4", "Bb4"],
-    mixolydian: ["C4", "D4", "E4", "F4", "G4", "A4", "Bb4"]
-  };
+const MusicPlayer = ({ musicProfile }) => {
+  const synthRef = useRef(null);
+  const [currentHouseIndex, setCurrentHouseIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const houseTimer = useRef(null);
 
   useEffect(() => {
-    if (!musicProfile || !activeHouse) return;
+    if (!musicProfile || musicProfile.length === 0 || !isPlaying) return;
 
-    const houseData = musicProfile.find(entry => entry.house === activeHouse);
-    if (!houseData) return;
+    const playHouse = (houseData) => {
+      const {
+        instrument,
+        tempo,
+        scale,
+        rhythm,
+        attack
+      } = houseData;
 
-    const {
-      instrument,
-      tempo,
-      scale,
-      rhythm,
-      attack
-    } = houseData;
+      const notes = scaleMap[scale] || scaleMap["ionian"];
+      Tone.Transport.cancel(); // clear previous events
+      Tone.Transport.bpm.value = tempo;
 
-    Tone.Transport.bpm.value = tempo;
-
-    // Choose instrument
-    if (!synthRef.current) {
-      switch (instrument) {
-        case "piano":
+      if (!synthRef.current) {
+        if (instrument === "piano") {
           synthRef.current = new Tone.Sampler({
             urls: {
               C4: "C4.mp3",
@@ -41,52 +41,53 @@ const MusicPlayer = ({ activeHouse, musicProfile }) => {
             release: 1,
             baseUrl: "https://tonejs.github.io/audio/salamander/"
           }).toDestination();
-          break;
-        case "pad":
-        case "pluck":
-        case "synth":
-        default:
+        } else {
           synthRef.current = new Tone.Synth({
             envelope: { attack }
           }).toDestination();
+        }
       }
-    }
 
-    const notes = scaleMap[scale] || scaleMap["ionian"];
+      let pattern = notes.map((note, i) => [note, `0:${i * (rhythm === "syncopated" ? 0.75 : 1)}`]);
 
-    // Rhythm pattern
-    let pattern;
-    switch (rhythm) {
-      case "arpeggiated":
-        pattern = notes.map((note, i) => [note, `0:${i}`]);
-        break;
-      case "syncopated":
-        pattern = notes.map((note, i) => [note, `0:${i * 0.75}`]);
-        break;
-      case "steady":
-      default:
-        pattern = notes.map((note, i) => [note, `0:${i}`]);
-    }
+      const part = new Tone.Part((time, note) => {
+        synthRef.current.triggerAttackRelease(note, "8n", time);
+      }, pattern).start(0);
 
-    const part = new Tone.Part((time, note) => {
-      synthRef.current.triggerAttackRelease(note, "8n", time);
-    }, pattern).start(0);
+      Tone.Transport.start();
+    };
 
-    Tone.Transport.start();
+    // Play current house
+    playHouse(musicProfile[currentHouseIndex]);
+
+    // Set timer to go to next house
+    houseTimer.current = setTimeout(() => {
+      setCurrentHouseIndex(prev => {
+        if (prev >= 11) {
+          setIsPlaying(false);
+          Tone.Transport.stop();
+          return 0;
+        }
+        return prev + 1;
+      });
+    }, 3000); // 3 seconds per house
 
     return () => {
-      part.dispose();
+      if (houseTimer.current) clearTimeout(houseTimer.current);
       Tone.Transport.stop();
       if (synthRef.current?.dispose) {
         synthRef.current.dispose();
+        synthRef.current = null;
       }
-      synthRef.current = null;
     };
-  }, [activeHouse, musicProfile]);
+  }, [musicProfile, currentHouseIndex, isPlaying]);
 
   return (
-    <div>
-      <p>🎵 Playing music for House {activeHouse}</p>
+    <div className="music-player">
+      <h4>Chart Playback</h4>
+      <p>{isPlaying ? `🎶 Playing House ${musicProfile[currentHouseIndex]?.house}` : "Paused"}</p>
+      <button onClick={() => setIsPlaying(true)} disabled={isPlaying}>Play All Houses</button>
+      <button onClick={() => setIsPlaying(false)}>Stop</button>
     </div>
   );
 };
