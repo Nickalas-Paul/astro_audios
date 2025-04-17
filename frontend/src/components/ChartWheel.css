@@ -1,0 +1,14 @@
+.chart-container {
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .active-house {
+    filter: drop-shadow(0 0 6px #FFD700) brightness(1.2);
+    transition: filter 0.3s ease;
+  }
+  .glow {
+    filter: drop-shadow(0 0 8px #FFD700) brightness(1.3);
+    transition: filter 0.3s ease;
+  }
+  
