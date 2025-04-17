@@ -6,6 +6,7 @@ import MusicPlayer from './components/MusicPlayer';
 import HouseDetails from './components/HouseDetails';
 import HouseProgression from './components/HouseProgression';
 import { fetchAstroData, fetchMusicProfile } from './services/astroService';
+import * as Tone from "tone";
 
 function App() {
   const [activeHouse, setActiveHouse] = useState(null);
@@ -102,7 +103,11 @@ function App() {
       )}
     </div>
   );
-
+  const handlePlayClick = async () => {
+    await Tone.start();         // 🔓 Unlock the browser AudioContext
+    setAutoPlay(true);           // ▶️ Start playing houses
+  };
+  
   return (
     <div className="App">
       {!birthData && !isLoading && !astroData && <LandingPage onSubmitBirthData={handleBirthDataSubmit} />}
@@ -139,6 +144,13 @@ function App() {
             <button onClick={() => setAutoPlay(false)} disabled={!autoPlay}>
               ⏹ Stop
             </button>
+            <button onClick={() => setAutoPlay(true)} disabled={autoPlay || !musicProfile}>
+              ▶️ Play My Chart
+            </button>
++ <button onClick={handlePlayClick} disabled={autoPlay || !musicProfile}>
+    ▶️ Play My Chart
+  </button>
+
           </div>
         </>
       )}
