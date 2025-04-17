@@ -8,63 +8,83 @@ const zodiacSigns = [
   "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
 ];
 
-const ChartWheel = ({ activeHouse, setActiveHouse }) => {
-  const ref = useRef();
+// ChartWheel highlights the activeHouse sector with a glow and updates when activeHouse changes.
+// It emits clicks back up via onHouseSelect.
+export default function ChartWheel({ activeHouse, onHouseSelect }) {
+  const svgRef = useRef(null);
 
   useEffect(() => {
-    const svg = d3.select(ref.current);
     const width = 300;
     const height = 300;
     const radius = 140;
+    const innerRadius = 60;
     const centerX = width / 2;
     const centerY = height / 2;
 
-    svg.selectAll("*").remove(); // Clear previous render
+    const svg = d3.select(svgRef.current)
+      .attr("width", width)
+      .attr("height", height);
 
-    const arcGenerator = d3.arc()
-      .innerRadius(60)
+    // Prepare pie & arc generators
+    const pie = d3.pie().value(() => 1);
+    const arcGen = d3.arc()
+      .innerRadius(innerRadius)
       .outerRadius(radius);
 
-    const pieGenerator = d3.pie().value(1);
+    const data = pie(houses);
 
-    const arcs = svg.append("g")
-      .attr("transform", `translate(${centerX}, ${centerY})`)
-      .selectAll("path")
-      .data(pieGenerator(houses))
-      .enter()
-      .append("path")
-      .attr("d", arcGenerator)
-      .attr("fill", (d, i) =>
-        d.data === activeHouse ? "#FFD700" : d3.schemeCategory10[i % 10]
-      )
-      .attr("stroke", "#333")
-      .attr("stroke-width", 1)
-      .attr("class", (d) => (d.data === activeHouse ? "glow" : "")) // ✨ Add glow here
-      .on("click", (event, d) => setActiveHouse(d.data));
+    // Ensure a single 'wheel' group for arcs
+    let wheelGroup = svg.select("g.wheel");
+    if (wheelGroup.empty()) {
+      wheelGroup = svg.append("g")
+        .attr("class", "wheel")
+        .attr("transform", `translate(${centerX},${centerY})`);
+    }
 
-    // Add labels
-    svg.append("g")
-      .attr("transform", `translate(${centerX}, ${centerY})`)
-      .selectAll("text")
-      .data(pieGenerator(houses))
-      .enter()
-      .append("text")
-      .attr("transform", d => {
-        const [x, y] = arcGenerator.centroid(d);
-        return `translate(${x}, ${y})`;
-      })
-      .attr("text-anchor", "middle")
-      .attr("alignment-baseline", "middle")
-      .attr("fill", "#fff")
-      .attr("font-size", "10px")
-      .text((d, i) => zodiacSigns[i].slice(0, 3));
-  }, [activeHouse]); // ✨ Depend on activeHouse to rerender glow
+    // Data join for arcs
+    const arcs = wheelGroup.selectAll("path").data(data);
+
+    arcs.join(
+      enter => enter.append("path")
+        .attr("d", arcGen)
+        .attr("stroke", "#333")
+        .attr("stroke-width", 1)
+        .attr("class", "arc")
+        .on("click", (e, d) => onHouseSelect(d.data)),
+      update => update,
+      exit => exit.remove()
+    )
+    .transition()
+      .duration(250)
+      .attr("fill", d => d.data === activeHouse ? "#FFD700" : d3.schemeCategory10[d.index % 10])
+      .attr("class", d => d.data === activeHouse ? "arc glow" : "arc");
+
+    // Labels join
+    let labelGroup = svg.select("g.labels");
+    if (labelGroup.empty()) {
+      labelGroup = svg.append("g")
+        .attr("class", "labels")
+        .attr("transform", `translate(${centerX},${centerY})`);
+    }
+
+    const texts = labelGroup.selectAll("text").data(data);
+    texts.join(
+      enter => enter.append("text")
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "middle")
+        .attr("font-size", "10px"),
+      update => update,
+      exit => exit.remove()
+    )
+    .attr("transform", d => `translate(${arcGen.centroid(d)})`)
+    .attr("fill", "#fff")
+    .text((d, i) => zodiacSigns[i].slice(0, 3));
+
+  }, [activeHouse, onHouseSelect]);
 
   return (
     <div className="chart-container">
-      <svg ref={ref} width={300} height={300}></svg>
+      <svg ref={svgRef}></svg>
     </div>
   );
-};
-
-export default ChartWheel;
+}
