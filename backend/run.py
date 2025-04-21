@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 from flask import Flask
 from flask_cors import CORS
-from chart_routes import chart_routes  # Import your blueprint directly
+from backend.chart_routes import chart_routes  # Adjusted import path to include the backend folder
 
 # Initialize Flask app
 app = Flask(__name__)
