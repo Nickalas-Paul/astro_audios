@@ -1,8 +1,10 @@
 // src/services/astroService.js
 
+const BACKEND_URL = "https://astro-audios.onrender.com"; // <-- your real backend URL
+
 export const fetchAstroData = async (birthData) => {
   try {
-    const response = await fetch('http://localhost:5000/api/astro', {
+    const response = await fetch(`${BACKEND_URL}/api/astro`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ birthData })
@@ -18,20 +20,8 @@ export const fetchAstroData = async (birthData) => {
   }
 };
 
+// Optional: Comment out or fix fetchMusicProfile if you don't have /api/music-profile yet
 export const fetchMusicProfile = async (chartData) => {
-  try {
-    const response = await fetch('https://astro-audios.onrender.com', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chart: chartData })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) throw new Error(data.message || 'Network response was not ok');
-    return data.profile;
-  } catch (error) {
-    console.error('Error fetching music profile:', error.message);
-    return null;
-  }
+  console.warn("fetchMusicProfile is not implemented yet.");
+  return null;
 };
