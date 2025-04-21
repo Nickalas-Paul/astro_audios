@@ -20,7 +20,7 @@ export const fetchAstroData = async (birthData) => {
 
 export const fetchMusicProfile = async (chartData) => {
   try {
-    const response = await fetch('http://localhost:5000/api/music-profile', {
+    const response = await fetch('https://astro-audios.onrender.com', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chart: chartData })
