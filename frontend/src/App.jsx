@@ -7,7 +7,6 @@ import HouseDetails from './components/HouseDetails';
 import HouseProgression from './components/HouseProgression';
 import { fetchAstroData, fetchMusicProfile } from './services/astroService';
 import * as Tone from "tone";
-import { fetchMusicProfile } from '/src/services/astroService.js';
 
 function App() {
   const [activeHouse, setActiveHouse] = useState(null);
