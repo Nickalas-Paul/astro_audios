@@ -7,6 +7,7 @@ export const fetchAstroData = async (birthData) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ birthData })
     });
+    async function fetchMusicProfile(/*…*/) { /*…*/ }
 
     const data = await response.json();
 
