@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
-#
-# Copilot: 
-# Write a bash script that
-# 1. Finds all .jsx and .tsx files in the backend/ folder and moves them into frontend/src/scripts/
-# 2. Deletes all *.hs.save files in backend/
-# 3. Stages the moves and deletes with git add/rm
+set -e
+
+# 1. Create scripts folder in frontend if it doesn't exist
+DEST="frontend/src/scripts"
+mkdir -p "$DEST"
+
+# 2. Move all .jsx/.tsx from backend to frontend/src/scripts
+find backend -maxdepth 1 -type f \( -iname '*.jsx' -o -iname '*.tsx' \) -print -exec mv {} "$DEST"/ \;
+
+# 3. Delete all .hs.save files in backend
+find backend -maxdepth 1 -type f -iname '*.hs.save' -print -delete
+
+# 4. Stage changes
+git add backend "$DEST"
+
+echo "🧹 Cleanup complete. Moved .jsx/.tsx to $DEST, deleted .hs.save files, and staged changes."
