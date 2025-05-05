@@ -89,19 +89,21 @@ def get_musical_profile(planet: str, sign: str, house: int):
     return musical_profile
 
 def validate_birth_data(data):
-    """Validate the structure and content of the birth data."""
-    required_keys = ["date", "time", "geolocation"]
+    """
+    Ensure we got date, time, lat, and lon.
+    """
+    # must be a dict
+    if not isinstance(data, dict):
+        return False, "Request body must be an object"
+
+    required_keys = ["date", "time", "lat", "lon"]
     for key in required_keys:
-        if key not in data or not data[key]:
+        if key not in data or data[key] in (None, ""):
             return False, f"Missing or empty field: {key}"
 
-    try:
-        datetime.strptime(data["date"], "%Y-%m-%d")
-        datetime.strptime(data["time"], "%H:%M")
-    except ValueError:
-        return False, "Invalid date or time format. Expected YYYY-MM-DD and HH:MM."
-    
-    return True, "Data is valid"
+    # Optionally: you can also validate formats here (date/time parsing, lat/lon numeric)
+    return True, ""
+
 def generate_music(input_data=None):
     """Placeholder for music generation logic."""
     print("generate_music() was called with:", input_data)

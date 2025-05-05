@@ -11,8 +11,8 @@ CORS(chart_routes)
 @chart_routes.route('/api/astro', methods=['POST'])
 def get_astro_data():
     """Fetch natal chart data from the external API, convert it, and return both Vedic and Western data."""
-    data = request.get_json()
-    birth_data = data.get('birthData')
+    data = request.get_json() or {}
+    birth_data = data.get('birthData') or data
 
     # Validate the birth data
     is_valid, message = validate_birth_data(birth_data)
