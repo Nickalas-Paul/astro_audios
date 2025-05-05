@@ -1,5 +1,7 @@
 import sys
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Add parent directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
