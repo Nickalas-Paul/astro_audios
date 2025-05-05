@@ -1,6 +1,4 @@
-// src/services/astroService.js
-
-const BACKEND_URL = "https://astro-audios.onrender.com"; // <-- your real backend URL
+const BACKEND_URL = "https://YOUR-RENDER-URL.onrender.com";  // <-- update with your actual Render URL
 
 export const fetchAstroData = async (birthData) => {
   try {
@@ -18,10 +16,4 @@ export const fetchAstroData = async (birthData) => {
     console.error('Error fetching astro data:', error.message);
     return null;
   }
-};
-
-// Optional: Comment out or fix fetchMusicProfile if you don't have /api/music-profile yet
-export const fetchMusicProfile = async (chartData) => {
-  console.warn("fetchMusicProfile is not implemented yet.");
-  return null;
 };
