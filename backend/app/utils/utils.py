@@ -90,19 +90,19 @@ def get_musical_profile(planet: str, sign: str, house: int):
 
 def validate_birth_data(data):
     """
-    Ensure we got date, time, lat, and lon.
+    Ensure we got date, time, lat, and lon in the JSON payload.
     """
-    # must be a dict
     if not isinstance(data, dict):
-        return False, "Request body must be an object"
+        return False, "Request body must be a JSON object"
 
     required_keys = ["date", "time", "lat", "lon"]
     for key in required_keys:
         if key not in data or data[key] in (None, ""):
             return False, f"Missing or empty field: {key}"
 
-    # Optionally: you can also validate formats here (date/time parsing, lat/lon numeric)
+    # Optionally verify formats here...
     return True, ""
+
 
 def generate_music(input_data=None):
     """Placeholder for music generation logic."""

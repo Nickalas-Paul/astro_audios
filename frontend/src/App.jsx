@@ -1,62 +1,61 @@
+// frontend/src/App.jsx
+
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import LandingPage from './components/LandingPage';
 import ChartWheel from './components/ChartWheel';
-import MusicPlayer from './components/MusicPlayer';
 import HouseDetails from './components/HouseDetails';
 import HouseProgression from './components/HouseProgression';
 import { fetchAstroData, fetchMusicProfile } from './services/astroService';
-import * as Tone from "tone";
+import * as Tone from 'tone';
 
 function App() {
   const [activeHouse, setActiveHouse] = useState(null);
   const [birthData, setBirthData] = useState(null);
   const [astroData, setAstroData] = useState(null);
-  const [musicProfile, setMusicProfile] = useState(null);
+  const [musicProfile, setMusicProfile] = useState([]);
   const [errorMessage, setErrorMessage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [autoPlay, setAutoPlay] = useState(false);
   const [currentHouseIndex, setCurrentHouseIndex] = useState(0);
 
+  // 1) Handle form submission → fetch astro data + music profile
   const handleBirthDataSubmit = async (data) => {
     setBirthData(data);
     setAstroData(null);
-    setMusicProfile(null);
+    setMusicProfile([]);
     setErrorMessage(null);
     setIsLoading(true);
 
     try {
       const astroResponse = await fetchAstroData(data);
-      if (astroResponse && astroResponse.status === "ok") {
+      if (astroResponse.status === 'ok') {
         setAstroData(astroResponse);
 
+        // extract chart placements
         const placements = astroResponse.western?.placements || [];
         const chart = placements
-          .filter(p => p.planet && p.sign && p.house)
-          .map(p => ({
-            planet: p.planet,
-            sign: p.sign,
-            house: p.house
-          }));
+          .filter(p => p.house)
+          .map(p => ({ planet: p.planet, sign: p.sign, house: p.house }));
 
         const musicResponse = await fetchMusicProfile(chart);
-        if (musicResponse) {
-          setMusicProfile(musicResponse);
-        }
+        // assume musicResponse.houses is an array of { house, note, duration, ... }
+        setMusicProfile(musicResponse.houses || []);
       } else {
-        setErrorMessage(`Error: ${astroResponse?.message || 'Astro data fetch failed.'}`);
+        setErrorMessage(`Error: ${astroResponse.message || 'Failed to fetch astro data'}`);
       }
-    } catch (error) {
-      setErrorMessage(`Error fetching data: ${error.message}`);
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      setErrorMessage(`Error fetching data: ${err.message}`);
     }
+
+    setIsLoading(false);
   };
 
+  // 2) Reset everything
   const handleReset = () => {
     setBirthData(null);
     setAstroData(null);
-    setMusicProfile(null);
+    setMusicProfile([]);
     setActiveHouse(null);
     setErrorMessage(null);
     setIsLoading(false);
@@ -64,37 +63,55 @@ function App() {
     setCurrentHouseIndex(0);
   };
 
-  useEffect(() => {
-    if (!autoPlay || !musicProfile || musicProfile.length === 0) return;
+  // 3) Unlock AudioContext & start autoplay
+  const handlePlayClick = async () => {
+    await Tone.start();
+    setAutoPlay(true);
+  };
 
+  // 4) Advance the currentHouseIndex every 3s when autoplay is on
+  useEffect(() => {
+    if (!autoPlay || !musicProfile.length) return;
     const interval = setInterval(() => {
-      setCurrentHouseIndex((prevIndex) => {
-        const nextIndex = prevIndex + 1;
-        if (nextIndex >= musicProfile.length) {
+      setCurrentHouseIndex(prev => {
+        const next = prev + 1;
+        if (next >= musicProfile.length) {
           setAutoPlay(false);
           return 0;
         }
-        return nextIndex;
+        return next;
       });
-    }, 3000); // 3 segundos por casa
-
+    }, 3000);
     return () => clearInterval(interval);
   }, [autoPlay, musicProfile]);
 
+  // 5) Update activeHouse whenever currentHouseIndex or musicProfile changes
   useEffect(() => {
-    if (musicProfile && musicProfile.length > 0) {
-      setActiveHouse(musicProfile[currentHouseIndex]?.house);
+    if (musicProfile.length) {
+      setActiveHouse(musicProfile[currentHouseIndex].house);
     }
   }, [currentHouseIndex, musicProfile]);
 
+  // 6) Play the note for the current house
+  useEffect(() => {
+    if (!autoPlay || !musicProfile.length) return;
+    const { note = 'C4', duration = '1n' } = musicProfile[currentHouseIndex];
+    const synth = new Tone.Synth().toDestination();
+    synth.triggerAttackRelease(note, duration);
+    return () => synth.dispose();
+  }, [currentHouseIndex, musicProfile, autoPlay]);
+
+  // 7) Render the music profile list
   const renderMusicProfile = () => (
     <div className="music-profile">
       <h3>Music Profile Summary</h3>
-      {musicProfile && musicProfile.length > 0 ? (
+      {musicProfile.length > 0 ? (
         <ul>
-          {musicProfile.map((item, index) => (
-            <li key={index}>
-              <strong>House {item.house} ({item.sign})</strong>: {item.instrument}, {item.motif}, {item.scale}, {item.tempo} BPM
+          {musicProfile.map((item, idx) => (
+            <li key={idx}>
+              <strong>
+                House {item.house} ({item.sign})
+              </strong>: {item.instrument}, {item.motif}, {item.scale}, {item.tempo} BPM
             </li>
           ))}
         </ul>
@@ -103,54 +120,67 @@ function App() {
       )}
     </div>
   );
-  const handlePlayClick = async () => {
-    await Tone.start();         // 🔓 Unlock the browser AudioContext
-    setAutoPlay(true);           // ▶️ Start playing houses
-  };
-  
+
   return (
     <div className="App">
-      {!birthData && !isLoading && !astroData && <LandingPage onSubmitBirthData={handleBirthDataSubmit} />}
+      {/* Landing / Form */}
+      {!birthData && !isLoading && !astroData && (
+        <LandingPage onSubmitBirthData={handleBirthDataSubmit} />
+      )}
+
+      {/* Loading */}
       {isLoading && <div className="loading-indicator">Generating Chart & Music...</div>}
+
+      {/* Error */}
       {errorMessage && !isLoading && (
         <div className="error-message">
           <p>{errorMessage}</p>
           <button onClick={handleReset}>Try Again</button>
         </div>
       )}
+
+      {/* Main Content */}
       {astroData && !isLoading && (
         <>
-          {birthData && (
-            <div className="birth-data-summary">
-              <p>Chart for: {birthData.date}, {birthData.time}, {birthData.location}</p>
-              <button onClick={handleReset}>Generate New Chart</button>
-            </div>
-          )}
+          {/* Summary + Reset */}
+          <div className="birth-data-summary">
+            <p>
+              Chart for: {birthData.date}, {birthData.time}, {birthData.location}
+            </p>
+            <button onClick={handleReset}>Generate New Chart</button>
+          </div>
+
           <div className="main-content-area">
             <div className="interactive-area">
-              <ChartWheel setActiveHouse={setActiveHouse} activeHouse={activeHouse} />
-              <HouseProgression setActiveHouse={setActiveHouse} activeHouse={activeHouse} />
-              <MusicPlayer musicProfile={musicProfile} currentHouseIndex={currentHouseIndex} />
+              <ChartWheel
+                activeHouse={activeHouse}
+                onHouseSelect={setActiveHouse}
+              />
+              <HouseProgression
+                activeHouse={activeHouse}
+                onSelectHouse={setActiveHouse}
+              />
             </div>
             <div className="details-area">
               <HouseDetails astroData={astroData} activeHouse={activeHouse} />
               {renderMusicProfile()}
             </div>
           </div>
+
+          {/* Play / Stop Controls */}
           <div className="autoplay-controls">
-            <button onClick={() => setAutoPlay(true)} disabled={autoPlay || !musicProfile}>
+            <button
+              onClick={handlePlayClick}
+              disabled={autoPlay || !musicProfile.length}
+            >
               ▶️ Play My Chart
             </button>
-            <button onClick={() => setAutoPlay(false)} disabled={!autoPlay}>
+            <button
+              onClick={() => setAutoPlay(false)}
+              disabled={!autoPlay}
+            >
               ⏹ Stop
             </button>
-            <button onClick={() => setAutoPlay(true)} disabled={autoPlay || !musicProfile}>
-              ▶️ Play My Chart
-            </button>
-+ <button onClick={handlePlayClick} disabled={autoPlay || !musicProfile}>
-    ▶️ Play My Chart
-  </button>
-
           </div>
         </>
       )}
