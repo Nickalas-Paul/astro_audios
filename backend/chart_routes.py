@@ -1,5 +1,3 @@
-# backend/chart_routes.py
-
 from flask import Blueprint, request, jsonify
 from datetime import datetime
 import requests
@@ -15,53 +13,47 @@ def get_astro_data():
     data = request.get_json() or {}
     birth_data = data.get('birthData') or data
 
-    # Validate the birth data
+    # 1) Validate date, time, lat, lon
     is_valid, message = validate_birth_data(birth_data)
     if not is_valid:
         return jsonify({"status": "error", "message": message}), 400
 
-    # Parse and validate date/time
-    date_str = birth_data.get('date')
-    time_str = birth_data.get('time')
+    # 2) Parse datetime
+    date_str = birth_data['date']
+    time_str = birth_data['time']
     try:
         dt_obj = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
         datetime_str = dt_obj.isoformat() + "+00:00"
     except ValueError:
         return jsonify({"status": "error", "message": "Invalid date/time format"}), 400
 
-    # Use flat lat/lon fields
-    latitude = birth_data.get('lat')
-    longitude = birth_data.get('lon')
-    if latitude is None or longitude is None:
-        return jsonify({"status": "error", "message": "Missing latitude or longitude"}), 400
+    # 3) Use flat lat/lon
+    latitude = birth_data['lat']
+    longitude = birth_data['lon']
 
+    # 4) Prepare external API call
     params = {
         "ayanamsa": 1,
         "coordinates": f"{latitude},{longitude}",
         "datetime": datetime_str
     }
-
-    # Call external astrology API
     try:
-        access_token = get_access_token()
-        headers = {"Authorization": f"Bearer {access_token}"}
-        response = requests.get(
+        token = get_access_token()
+        headers = {"Authorization": f"Bearer {token}"}
+        resp = requests.get(
             'https://api.prokerala.com/v2/astrology/kundli',
             headers=headers,
             params=params
         )
-        response.raise_for_status()
-        vedic_result = response.json()
-    except requests.exceptions.RequestException as e:
-        return jsonify({"status": "error", "message": f"Failed to fetch astro data: {str(e)}"}), 500
+        resp.raise_for_status()
+        vedic = resp.json().get("data", {})
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Failed to fetch astro data: {e}"}), 500
 
-    # Convert and combine results
-    vedic_data = vedic_result.get("data", {})
-    western_data = convert_vedic_to_western(vedic_data)
-    combined_result = {
-        "vedic": vedic_data,
-        "western": western_data,
-        "status": vedic_result.get("status", "ok")
-    }
-
-    return jsonify(combined_result)
+    # 5) Convert and return
+    western = convert_vedic_to_western(vedic)
+    return jsonify({
+        "status": "ok",
+        "vedic": vedic,
+        "western": western
+    })

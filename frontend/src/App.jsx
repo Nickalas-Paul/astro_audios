@@ -20,36 +20,48 @@ function App() {
   const [currentHouseIndex, setCurrentHouseIndex] = useState(0);
 
   // 1) Handle form submission → fetch astro data + music profile
-  const handleBirthDataSubmit = async (data) => {
-    setBirthData(data);
-    setAstroData(null);
-    setMusicProfile([]);
-    setErrorMessage(null);
-    setIsLoading(true);
+// in frontend/src/App.jsx, replace your existing handleBirthDataSubmit with this:
 
-    try {
-      const astroResponse = await fetchAstroData(data);
-      if (astroResponse.status === 'ok') {
-        setAstroData(astroResponse);
+const handleBirthDataSubmit = async (data) => {
+  setBirthData(data);
+  setAstroData(null);
+  setMusicProfile([]); 
+  setErrorMessage(null);
+  setIsLoading(true);
 
-        // extract chart placements
-        const placements = astroResponse.western?.placements || [];
-        const chart = placements
-          .filter(p => p.house)
-          .map(p => ({ planet: p.planet, sign: p.sign, house: p.house }));
-
-        const musicResponse = await fetchMusicProfile(chart);
-        // assume musicResponse.houses is an array of { house, note, duration, ... }
-        setMusicProfile(musicResponse.houses || []);
-      } else {
-        setErrorMessage(`Error: ${astroResponse.message || 'Failed to fetch astro data'}`);
-      }
-    } catch (err) {
-      setErrorMessage(`Error fetching data: ${err.message}`);
+  try {
+    // 1) Fetch astro data
+    const astroResponse = await fetchAstroData(data);
+    if (astroResponse.status !== 'ok') {
+      setErrorMessage(`Error: ${astroResponse.message || 'Astro data fetch failed.'}`);
+      setIsLoading(false);
+      return;
     }
+    setAstroData(astroResponse);
 
+    // 2) Build a simple chart array for music
+    const placements = astroResponse.western?.placements || [];
+    const chart = placements
+      .filter(p => p.house)
+      .map(p => ({ planet: p.planet, sign: p.sign, house: p.house }));
+
+    // 3) Fetch music profile
+    const musicResponse = await fetchMusicProfile(chart);
+
+    // 4) Re-order houses CCW: start at index 0 (House 1),
+    //    then go through the rest in reverse order (House 12, 11, … 2)
+    const raw = musicResponse.houses || [];
+    const ordered = raw.length > 1
+      ? [ raw[0], ...raw.slice(1).reverse() ]
+      : raw;
+
+    setMusicProfile(ordered);
+  } catch (err) {
+    setErrorMessage(`Error fetching data: ${err.message}`);
+  } finally {
     setIsLoading(false);
-  };
+  }
+};
 
   // 2) Reset everything
   const handleReset = () => {
